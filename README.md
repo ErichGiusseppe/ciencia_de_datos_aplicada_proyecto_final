@@ -1,49 +1,72 @@
-# Análisis Exploratorio de Datos Académicos
+# Análisis Exploratorio de Datos - Sistema de Recomendaciones Académicas
 
 ## Integrantes del Equipo
 - [Agregar nombres de los integrantes]
 
+## Contexto del Proyecto
+Este repositorio contiene los notebooks de análisis exploratorio para un sistema de recomendaciones académicas basado en clustering jerárquico. El proyecto busca transformar la consejería universitaria mediante agrupamiento de estudiantes según patrones históricos de desempeño, permitiendo recomendaciones fundamentadas en evidencia empírica.
+
 ## Objetivo
-Realizar un análisis exploratorio de datos (EDA) sobre ocho fuentes de información académica para desarrollar un sistema de recomendaciones de materias y créditos a inscribir por semestre, basado en clusterización jerárquica de estudiantes con perfiles académicos similares.
+Realizar análisis exploratorio de datos (EDA) sobre ocho fuentes de información académica para validar la viabilidad de un sistema de recomendaciones de materias y créditos por semestre. El sistema agrupará estudiantes con perfiles académicos similares mediante clustering jerárquico, fundamentando la consejería en patrones históricos de éxito y riesgo.
 
 ## Alcance
-El proyecto analiza las siguientes fuentes de datos:
-- Historial de estados académicos de estudiantes
-- Historial de materias cursadas
-- Historial de rendimiento académico
-- Horarios de cursos
-- Información actual de estudiantes
-- Información financiera
-- Percentiles académicos por programa
-- Riesgos históricos académicos (pregrado)
+Este análisis exploratorio evalúa la calidad, estructura y patrones en ocho datasets anonimizados del observatorio académico institucional:
 
-## Conclusiones Principales
+- **Historial Estados Académicos** (616,085 registros): Trayectoria académica completa por periodo
+- **Historial Materias** (4,931,740 registros): Cada materia inscrita con créditos y calificaciones
+- **Historial Rendimiento Académico** (611,654 registros): Indicadores como PGA y distribución de créditos
+- **Información Actual** (222,407 registros): Estado reciente con datos demográficos generalizados
+- **Horarios Curso** (444,834 registros): Programación académica por periodo
+- **Riesgos Históricos Pregrado** (369,370 registros): Indicadores binarios de factores de riesgo
+- **Información Financiera** (793,198 registros): Modalidades de financiamiento
+- **Percentiles Académicos** (158,429 registros): Rendimiento relativo por programa
+
+## Conclusiones e Insights
+
+### Viabilidad del Sistema
+El análisis exploratorio **confirma la viabilidad técnica y pertinencia estratégica** del proyecto. Los datos demuestran patrones diferenciables y recurrentes que justifican el uso de clustering jerárquico para agrupamiento de estudiantes.
 
 ### Calidad de Datos
-La calidad general es buena, con la mayoría de datasets presentando menos del 1% de valores nulos en variables críticas. Se identificaron valores atípicos en variables como EDAD y CREDITOS_MAXIMOS que requieren limpieza previa.
+Calidad general notablemente buena con menos del 1% de valores nulos en variables críticas. Excepciones importantes:
+- Variables de segundo programa (>80% nulos) - **descartar**
+- Información pre-universitaria (35-66% nulos) - uso limitado
+- Indicadores de riesgo (nulos por diseño = ausencia de riesgo)
+- Valores atípicos detectados: EDAD (máx. 1935 años), CREDITOS_MAXIMOS (máx. 1,000,000) - **requieren limpieza**
 
 ### Variables Críticas Identificadas
+
 **Capacidad académica:**
-- PERCENTIL_PGA_PROGRAMA (normalizado por programa)
-- PGA (Promedio General Acumulado)
-- PORCENTAJE_CREDITOS_APROBADOS
+- **PERCENTIL_PGA_PROGRAMA** (variable estrella - normaliza rendimiento por programa)
+- PGA (Promedio General Acumulado, media 3.97)
+- PORCENTAJE_CREDITOS_APROBADOS (media 89.4%)
+- PROMEDIO_SEMESTRAL (rendimiento reciente)
+
+**Experiencia y progreso:**
+- SEMESTRE_SEGUN_CREDITOS / GRUPO_SEMESTRES
+- TOTAL_SEMESTRES_MATRICULADOS (media 4.84)
+- CREDITOS_PGA (créditos acumulados)
 
 **Indicadores de riesgo:**
 - CREDITOS_REPROBADOS / CREDITOS_RETIRADOS
-- Variables de riesgos históricos (tres_o_mas_materias_retiradas, etc.)
-- ESTADO_ACADEMICO (Normal, Prueba, Suspensión)
+- tres_o_mas_materias_retiradas (~5% de casos)
+- ESTADO_ACADEMICO (Normal 79%, Prueba, Suspensión)
+- MATERIA_POR_TERCERA_VEZ
 
 **Contexto del estudiante:**
-- PROGRAMA_1 y NIVEL_PROGRAMA_1
-- SEMESTRE_SEGUN_CREDITOS
+- PROGRAMA_1 y NIVEL_PROGRAMA_1 (segmentación obligatoria)
 - TIPO_MATRICULA_SEMESTRE
+- CREDITOS_MAXIMOS (límite institucional)
+- ESTRATO_SOCIOECONOMICO
 
 ### Hallazgos Clave
-- Variables relacionadas con segundo programa (PROGRAMA_2) presentan >80% nulos y deben descartarse
-- El 98% de estudiantes están matriculados en periodo actual
-- Estudiantes con percentil <25 requieren cargas reducidas; percentil >75 pueden manejar cargas mayores
-- 14.94% de estudiantes tienen tasa de aprobación <50%, indicando riesgo extremo
+- **15% de estudiantes** presenta tasa de aprobación <50% (riesgo extremo - requieren cargas mínimas 6-9 créditos)
+- **Percentil <25**: requieren cargas reducidas y materias con alta probabilidad de éxito
+- **Percentil >75**: pueden manejar cargas mayores y combinaciones más desafiantes
+- 52.55% no cumple requisito de lectura/inglés al sexto semestre
+- Variables PROGRAMA_2 (>80% nulos) deben descartarse completamente
 - La integración de datasets mediante CODIGO_ESTUDIANTE permite construir perfiles completos
+- Media de 2.77 créditos por materia permite analizar redes de co-inscripción y secuencias curriculares
+- Clustering debe segmentarse primero por nivel y programa antes de aplicar algoritmo
 
 ## Instrucciones de Ejecución
 
