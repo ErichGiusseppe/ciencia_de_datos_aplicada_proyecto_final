@@ -75,7 +75,9 @@ Calidad general notablemente buena con menos del 1% de valores nulos en variable
 
 - **`notebooks/`**: Contiene todos los notebooks de análisis exploratorio de datos
 - **`docs/`**: Contiene la documentación del proyecto:
-  - Resumen ejecutivo y documento del punto 6 de CDA
+  - `Punto 6 Completo.pdf`: Documento del punto 6 de CDA
+  - `Proyecto_CDA Completo.pdf`
+  - `Resumen_Ejecutivo_Entrega_1.pdf`: Resumen ejecutivo del proyecto
   - `CDA_prototipo.pdf`: Prototipo de la solución
   - `Proyecto CDA_presentacion.pdf`: Presentación del proyecto
 
