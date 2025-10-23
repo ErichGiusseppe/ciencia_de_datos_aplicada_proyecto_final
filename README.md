@@ -74,7 +74,10 @@ Calidad general notablemente buena con menos del 1% de valores nulos en variable
 ## Estructura del Repositorio
 
 - **`notebooks/`**: Contiene todos los notebooks de análisis exploratorio de datos
-- **`docs/`**: Contiene el resumen ejecutivo y el documento del punto 6 de CDA
+- **`docs/`**: Contiene la documentación del proyecto:
+  - Resumen ejecutivo y documento del punto 6 de CDA
+  - `CDA_prototipo.pdf`: Prototipo de la solución
+  - `Proyecto CDA_presentacion.pdf`: Presentación del proyecto
 
 ## Instrucciones de Ejecución
 
