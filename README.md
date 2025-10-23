@@ -6,6 +6,34 @@
 - Erich Giusseppe - 201818220
 - David Fuquen - 202021113
 
+## Estructura del Proyecto
+```
+ciencia_de_datos_aplicada_proyecto_final/
+│
+├── notebooks/          # Notebooks de análisis exploratorio por dataset
+│   ├── historial_estados_academicos_estudiante_anonymized.ipynb
+│   ├── historial_materias_estudiante_anonymized.ipynb
+│   ├── historial_rendimiento_academico_estudiante_anonymized.ipynb
+│   ├── horarios_curso_anonymized.ipynb
+│   ├── informacion_actual_estudiante_anonymized.ipynb
+│   ├── informacion_financiera_estudiante_anonymized.ipynb
+│   ├── percentiles_academicos_estudiante_anonymized.ipynb
+│   └── riesgos_historicos_estudiante_pregrado_anonymized.ipynb
+│
+├── docs/               # Documentación, presentaciones y anexos del proyecto
+│   ├── Resumen_Ejecutivo_Entrega_1.pdf  ← **Documento oficial de entrega**
+│   ├── Proyecto_CDA_Completo.pdf
+│   └── [Presentación y mockups]
+│
+├── README.md           # Este archivo
+└── requirements.txt    # Dependencias del proyecto
+```
+
+**Documento oficial de entrega 1:** [`docs/Resumen_Ejecutivo_Entrega_1.pdf`](docs/Resumen_Ejecutivo_Entrega_1.pdf)
+
+La carpeta **`notebooks/`** contiene todos los notebooks Jupyter utilizados para el análisis exploratorio de datos (EDA) de cada uno de los ocho datasets del proyecto. Cada notebook se enfoca en un dataset específico y sigue una estructura consistente de análisis.
+
+La carpeta **`docs/`** contiene toda la documentación formal del proyecto, incluyendo el resumen ejecutivo oficial, el documento completo del proyecto, la presentación utilizada en el video de sustentación y los mockups del sistema propuesto.
 ## Contexto del Proyecto
 Este repositorio contiene los notebooks de análisis exploratorio para un sistema de recomendaciones académicas basado en clustering jerárquico. El proyecto busca transformar la consejería universitaria mediante agrupamiento de estudiantes según patrones históricos de desempeño, permitiendo recomendaciones fundamentadas en evidencia empírica.
 
