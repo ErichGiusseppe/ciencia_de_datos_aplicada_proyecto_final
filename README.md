@@ -68,6 +68,11 @@ Calidad general notablemente buena con menos del 1% de valores nulos en variable
 - Media de 2.77 créditos por materia permite analizar redes de co-inscripción y secuencias curriculares
 - Clustering debe segmentarse primero por nivel y programa antes de aplicar algoritmo
 
+## Estructura del Repositorio
+
+- **`notebooks/`**: Contiene todos los notebooks de análisis exploratorio de datos
+- **`docs/`**: Contiene el resumen ejecutivo y el documento del punto 6 de CDA
+
 ## Instrucciones de Ejecución
 
 ### Requisitos
@@ -81,7 +86,7 @@ pip install -r requirements.txt
 ```
 
 ### Ejecución de Notebooks
-Los notebooks pueden ejecutarse en orden según el dataset a explorar:
+Los notebooks se encuentran en la carpeta `notebooks/` y pueden ejecutarse en orden según el dataset a explorar:
 
 1. `historial_estados_academicos_estudiante_anonymized.ipynb`
 2. `historial_materias_estudiante_anonymized.ipynb`
