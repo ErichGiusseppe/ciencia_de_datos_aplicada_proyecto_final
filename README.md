@@ -1,7 +1,10 @@
 # Análisis Exploratorio de Datos - Sistema de Recomendaciones Académicas
 
 ## Integrantes del Equipo
-- [Agregar nombres de los integrantes]
+- Santiago Martínez - 202112020
+- Nicolás Klopstock - 202021352
+- Erich Giusseppe - 201818220
+- David Fuquen - 202021113
 
 ## Contexto del Proyecto
 Este repositorio contiene los notebooks de análisis exploratorio para un sistema de recomendaciones académicas basado en clustering jerárquico. El proyecto busca transformar la consejería universitaria mediante agrupamiento de estudiantes según patrones históricos de desempeño, permitiendo recomendaciones fundamentadas en evidencia empírica.
