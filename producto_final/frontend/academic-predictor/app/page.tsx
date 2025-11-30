@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card, Form, Badge, InputGroup, Spinner, Alert } from 'react-bootstrap';
+import { Button, Card, Form, Badge, InputGroup, Spinner, Alert, ListGroup } from 'react-bootstrap';
 
 interface CourseWithCredits {
   code: string;
@@ -18,6 +18,12 @@ export default function Home() {
   const [maxCreditsInput, setMaxCreditsInput] = useState('20');
   const [maxCredits, setMaxCredits] = useState<number | null>(null);
 
+  // Autocomplete States
+  const [studentSuggestions, setStudentSuggestions] = useState<string[]>([]);
+  const [courseSuggestions, setCourseSuggestions] = useState<string[]>([]);
+  const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+  const [showCourseDropdown, setShowCourseDropdown] = useState(false);
+
   // Selection States
   const [confirmedStudent, setConfirmedStudent] = useState<string | null>(null);
   const [selectedCourses, setSelectedCourses] = useState<CourseWithCredits[]>([]);
@@ -27,8 +33,65 @@ export default function Home() {
   const [loadingCourse, setLoadingCourse] = useState(false);
   const [msg, setMsg] = useState<{type: 'danger' | 'success', text: string} | null>(null);
 
+  // Refs for detecting clicks outside
+  const studentDropdownRef = useRef<HTMLDivElement>(null);
+  const courseDropdownRef = useRef<HTMLDivElement>(null);
+
   // Calculate total credits
   const totalCredits = selectedCourses.reduce((sum, course) => sum + course.credits, 0);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (studentDropdownRef.current && !studentDropdownRef.current.contains(event.target as Node)) {
+        setShowStudentDropdown(false);
+      }
+      if (courseDropdownRef.current && !courseDropdownRef.current.contains(event.target as Node)) {
+        setShowCourseDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Search for student IDs
+  useEffect(() => {
+    const searchStudents = async () => {
+      if (studentInput.length < 3) {
+        setStudentSuggestions([]);
+        setShowStudentDropdown(false);
+        return;
+      }
+
+      const res = await fetch(`/api/search-id?type=student&query=${encodeURIComponent(studentInput)}&limit=10`);
+      const data = await res.json();
+      setStudentSuggestions(data.results || []);
+      setShowStudentDropdown(data.results?.length > 0);
+    };
+
+    const debounceTimer = setTimeout(searchStudents, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [studentInput]);
+
+  // Search for course IDs
+  useEffect(() => {
+    const searchCourses = async () => {
+      if (courseInput.length < 3) {
+        setCourseSuggestions([]);
+        setShowCourseDropdown(false);
+        return;
+      }
+
+      const res = await fetch(`/api/search-id?type=course&query=${encodeURIComponent(courseInput)}&limit=10`);
+      const data = await res.json();
+      setCourseSuggestions(data.results || []);
+      setShowCourseDropdown(data.results?.length > 0);
+    };
+
+    const debounceTimer = setTimeout(searchCourses, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [courseInput]);
 
   // Helper to validate ID via our Next.js API
   const validateId = async (type: 'student' | 'course', id: string) => {
@@ -38,23 +101,29 @@ export default function Home() {
   };
 
   // 1. Handle Student Search
-  const handleSearchStudent = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSearchStudent = async (studentId?: string) => {
     setMsg(null);
     
-    if (!studentInput.trim()) return;
+    const idToSearch = studentId || studentInput.trim();
+    if (!idToSearch) return;
 
     setLoadingStudent(true);
-    const { exists } = await validateId('student', studentInput.trim());
+    const { exists } = await validateId('student', idToSearch);
     setLoadingStudent(false);
 
     if (exists) {
-      setConfirmedStudent(studentInput.trim());
+      setConfirmedStudent(idToSearch);
       setStudentInput(''); // Clear input
+      setShowStudentDropdown(false);
       setMsg({ type: 'success', text: 'Estudiante encontrado y seleccionado.' });
     } else {
-      setMsg({ type: 'danger', text: `El estudiante ${studentInput} no existe en la base de datos.` });
+      setMsg({ type: 'danger', text: `El estudiante ${idToSearch} no existe en la base de datos.` });
     }
+  };
+
+  const handleStudentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearchStudent();
   };
 
   // 2. Handle Max Credits
@@ -79,36 +148,40 @@ export default function Home() {
   };
 
   // 3. Handle Course Search
-  const handleSearchCourse = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSearchCourse = async (courseId?: string) => {
     setMsg(null);
 
-    const courseId = courseInput.trim();
-    if (!courseId) return;
+    const idToSearch = courseId || courseInput.trim();
+    if (!idToSearch) return;
 
     // Pre-check: Duplicates
-    if (selectedCourses.some(c => c.code === courseId)) {
+    if (selectedCourses.some(c => c.code === idToSearch)) {
       setMsg({ type: 'danger', text: 'Este curso ya está en la lista.' });
       return;
     }
 
     setLoadingCourse(true);
-    const { exists, credits } = await validateId('course', courseId);
+    const { exists, credits } = await validateId('course', idToSearch);
     setLoadingCourse(false);
 
     if (exists) {
-      const creditsLimit = maxCredits || 20; // Use 20 as fallback
-      // Check if adding this course would exceed max credits
+      const creditsLimit = maxCredits || 20;
       if (totalCredits + credits > creditsLimit) {
         setMsg({ type: 'danger', text: `No se puede agregar. Excedería el máximo de ${creditsLimit} créditos (actual: ${totalCredits}, nuevo: ${totalCredits + credits}).` });
         return;
       }
 
-      setSelectedCourses([...selectedCourses, { code: courseId, credits }]);
-      setCourseInput(''); // Clear input
+      setSelectedCourses([...selectedCourses, { code: idToSearch, credits }]);
+      setCourseInput('');
+      setShowCourseDropdown(false);
     } else {
-      setMsg({ type: 'danger', text: `El curso ${courseId} no existe.` });
+      setMsg({ type: 'danger', text: `El curso ${idToSearch} no existe.` });
     }
+  };
+
+  const handleCourseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearchCourse();
   };
 
   // Remove course
@@ -153,20 +226,41 @@ export default function Home() {
             <Form.Label className="fw-bold">1. Seleccionar estudiante</Form.Label>
             
             {!confirmedStudent ? (
-              <Form onSubmit={handleSearchStudent}>
-                <InputGroup>
-                  <Form.Control
-                    placeholder="Ej: EST_00054523"
-                    value={studentInput}
-                    onChange={(e) => setStudentInput(e.target.value)}
-                    disabled={loadingStudent}
-                  />
-                  <Button variant="primary" type="submit" disabled={loadingStudent}>
-                    {loadingStudent ? <Spinner size="sm" animation="border" /> : 'Buscar'}
-                  </Button>
-                </InputGroup>
-                <Form.Text className="text-muted">Presione Enter para validar.</Form.Text>
-              </Form>
+              <div ref={studentDropdownRef} style={{ position: 'relative' }}>
+                <Form onSubmit={handleStudentSubmit}>
+                  <InputGroup>
+                    <Form.Control
+                      placeholder="Ej: EST_00054523"
+                      value={studentInput}
+                      onChange={(e) => setStudentInput(e.target.value)}
+                      disabled={loadingStudent}
+                      autoComplete="off"
+                    />
+                    <Button variant="primary" type="submit" disabled={loadingStudent}>
+                      {loadingStudent ? <Spinner size="sm" animation="border" /> : 'Buscar'}
+                    </Button>
+                  </InputGroup>
+                  <Form.Text className="text-muted">Presione Enter para validar o seleccione de la lista.</Form.Text>
+                </Form>
+                
+                {showStudentDropdown && studentSuggestions.length > 0 && (
+                  <ListGroup style={{ position: 'absolute', zIndex: 1000, width: '100%', maxHeight: '200px', overflowY: 'auto' }}>
+                    {studentSuggestions.map((id) => (
+                      <ListGroup.Item 
+                        key={id} 
+                        action 
+                        onClick={() => {
+                          setStudentInput(id);
+                          handleSearchStudent(id);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {id}
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
+              </div>
             ) : (
               <div className="d-flex align-items-center p-3 border rounded bg-light-success border-success">
                 <div className="flex-grow-1">
@@ -222,19 +316,40 @@ export default function Home() {
           {/* --- SECTION 3: COURSES --- */}
           <div className="mb-4">
             <Form.Label className="fw-bold">3. Agregar cursos a inscribir</Form.Label>
-            <Form onSubmit={handleSearchCourse}>
-              <InputGroup className="mb-2">
-                <Form.Control
-                  placeholder="Ej: CRS_00017889"
-                  value={courseInput}
-                  onChange={(e) => setCourseInput(e.target.value)}
-                  disabled={loadingCourse || totalCredits >= creditsLimit}
-                />
-                <Button variant="secondary" type="submit" disabled={loadingCourse || totalCredits >= creditsLimit}>
-                   {loadingCourse ? <Spinner size="sm" animation="border" /> : 'Agregar'}
-                </Button>
-              </InputGroup>
-            </Form>
+            <div ref={courseDropdownRef} style={{ position: 'relative' }}>
+              <Form onSubmit={handleCourseSubmit}>
+                <InputGroup className="mb-2">
+                  <Form.Control
+                    placeholder="Ej: CRS_00017889"
+                    value={courseInput}
+                    onChange={(e) => setCourseInput(e.target.value)}
+                    disabled={loadingCourse || totalCredits >= creditsLimit}
+                    autoComplete="off"
+                  />
+                  <Button variant="secondary" type="submit" disabled={loadingCourse || totalCredits >= creditsLimit}>
+                     {loadingCourse ? <Spinner size="sm" animation="border" /> : 'Agregar'}
+                  </Button>
+                </InputGroup>
+              </Form>
+              
+              {showCourseDropdown && courseSuggestions.length > 0 && (
+                <ListGroup style={{ position: 'absolute', zIndex: 1000, width: '100%', maxHeight: '200px', overflowY: 'auto' }}>
+                  {courseSuggestions.map((id) => (
+                    <ListGroup.Item 
+                      key={id} 
+                      action 
+                      onClick={() => {
+                        setCourseInput(id);
+                        handleSearchCourse(id);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {id}
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              )}
+            </div>
             
             {/* List of added courses */}
             <div className="mt-3 p-3 bg-light rounded min-vh-10" style={{ minHeight: '100px' }}>
