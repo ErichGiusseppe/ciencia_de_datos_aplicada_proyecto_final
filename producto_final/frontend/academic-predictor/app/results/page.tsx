@@ -233,10 +233,10 @@ export default function Results() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <Button variant="outline-secondary" onClick={() => router.push('/')}>
           &larr; Volver a la búsqueda
-        </Button>x
+        </Button>
         
         <div className="d-flex align-items-center gap-2 text-muted">
-          <BsLightbulb size={20} className="text-primary" />
+          <BsLightbulb size={20} />
           <small className="fst-italic">De click en este ícono para más información de cada indicador</small>
         </div>
       </div>
