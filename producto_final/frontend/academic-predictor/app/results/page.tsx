@@ -102,14 +102,14 @@ export default function Results() {
         &larr; Volver a la búsqueda
       </Button>
 
-      <h2 className="mb-4 text-center fw-bold">Resultados del Análisis</h2>
+      <h2 className="mb-4 text-center fw-bold">Resultados del análisis</h2>
 
       {result && (
         <Row>
             {/* Main Probability Card */}
             <Col md={12} className="mb-4">
                 <Card className={`text-center border-${getVariant(result.probabilidad_exito)} shadow`}>
-                    <Card.Header as="h5">Probabilidad de Éxito Académico</Card.Header>
+                    <Card.Header as="h5">Probabilidad de éxito académico</Card.Header>
                     <Card.Body className="py-5">
                         <h1 className={`display-1 fw-bold text-${getVariant(result.probabilidad_exito)}`}>
                             {(result.probabilidad_exito * 100).toFixed(1)}%
@@ -131,19 +131,19 @@ export default function Results() {
             {/* Details Card */}
             <Col md={6} className="mb-4">
                 <Card className="h-100 shadow-sm">
-                    <Card.Header className="fw-bold bg-light">Detalles del Clustering</Card.Header>
+                    <Card.Header className="fw-bold bg-light">Detalles del clustering</Card.Header>
                     <Card.Body>
                         <ul className="list-group list-group-flush">
                             <li className="list-group-item d-flex justify-content-between align-items-center">
-                                Cluster Asignado
-                                <Badge bg="info" pill>#{result.cluster_id} de {result.total_clusters}</Badge>
+                                Cluster asignado (id)
+                                <Badge bg="info" pill> {result.cluster_id}</Badge>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
-                                Estudiantes Similares
+                                Estudiantes similares
                                 <span className="fw-bold">{result.num_estudiantes_similares}</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
-                                Nivel de Análisis
+                                Nivel de análisis
                                 <span className="text-end text-muted">{result.nivel_usado}</span>
                             </li>
                         </ul>
@@ -154,15 +154,15 @@ export default function Results() {
              {/* Context Card */}
              <Col md={6} className="mb-4">
                 <Card className="h-100 shadow-sm">
-                    <Card.Header className="fw-bold bg-light">Análisis del Modelo</Card.Header>
+                    <Card.Header className="fw-bold bg-light">Análisis del modelo</Card.Header>
                     <Card.Body>
-                        <Card.Title>Razón del Resultado</Card.Title>
+                        <Card.Title>Razón del resultado</Card.Title>
                         <Card.Text>
                             {result.razon}
                         </Card.Text>
                         <hr />
                         <div className="d-flex justify-content-between align-items-center">
-                            <span>Confianza del modelo:</span>
+                            <span>Confianza del modelo: (alto es 50 o más, medio entre 20 y 49, bajo menos de 20) </span>
                             <div className="d-flex align-items-center gap-2">
                                 <span>{result.confianza}</span>
                             </div>
