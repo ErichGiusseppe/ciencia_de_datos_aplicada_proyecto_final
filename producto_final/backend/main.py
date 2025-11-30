@@ -27,12 +27,14 @@ df_estudiantes = modelo['df_estudiantes']
 class PrediccionRequest(BaseModel):
     estudiante_id: str
     cursos: list[str]
+    creditos: int
 
 @app.post("/predecir")
 def predecir(request: PrediccionRequest):
     resultado = predecir_estudiante_api(
         request.estudiante_id,
         request.cursos,
+        request.creditos,
         df_estudiantes,
         resultados_por_nivel
     )
