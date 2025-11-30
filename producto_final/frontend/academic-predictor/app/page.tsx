@@ -195,7 +195,8 @@ export default function Home() {
     
     const payload = {
       estudiante_id: confirmedStudent,
-      cursos: selectedCourses.map(c => c.code)
+      cursos: selectedCourses.map(c => c.code),
+      creditos: totalCredits || 20
     };
 
     sessionStorage.setItem('predictionPayload', JSON.stringify(payload));

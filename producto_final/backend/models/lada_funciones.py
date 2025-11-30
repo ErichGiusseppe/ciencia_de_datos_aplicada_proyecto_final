@@ -127,13 +127,13 @@ def predecir_probabilidad_exito(estudiante_perfil, df_inscripciones, df_estudian
     }
 
 
-def predecir_estudiante_api(estudiante_id, lista_cursos, df_estudiantes, resultados_por_nivel):
+def predecir_estudiante_api(estudiante_id, lista_cursos, creditos, df_estudiantes, resultados_por_nivel):
     """Funcion simplificada para APIs."""
     perfil = {
         'estudiante_id': estudiante_id,
         'cursos': lista_cursos,
         'num_cursos': len(lista_cursos),
-        'creditos': len(lista_cursos) * 3
+        'creditos': creditos
     }
 
     resultado = predecir_probabilidad_exito(

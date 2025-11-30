@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, Button, Spinner, Alert, ProgressBar, Badge, Row, Col } from 'react-bootstrap';
+import { Card, Button, Spinner, Alert, ProgressBar, Badge, Row, Col, Modal } from 'react-bootstrap';
+import { BsLightbulb } from 'react-icons/bs';
 
 // Interface matching your API response
 interface PredictionResponse {
@@ -11,7 +12,7 @@ interface PredictionResponse {
   probabilidad_exito: number;
   cluster_id: number;
   num_estudiantes_similares: number;
-  confianza: number; // Assuming float between 0 and 1
+  confianza: string;
   total_clusters: number;
 }
 
@@ -20,7 +21,10 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState('');
-  const [requestData, setRequestData] = useState<{ estudiante_id: string, cursos: string[] } | null>(null);
+  const [requestData, setRequestData] = useState<{ estudiante_id: string, cursos: string[], creditos: number } | null>(null);
+  const [showNivelModal, setShowNivelModal] = useState(false);
+  const [showRazonModal, setShowRazonModal] = useState(false);
+  const [showConfianzaModal, setShowConfianzaModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +74,130 @@ export default function Results() {
     return 'danger';
   };
 
+  // Get nivel explanation
+  const getNivelExplanation = (nivel: string) => {
+    const upperNivel = nivel.toUpperCase();
+    
+    if (upperNivel.includes('NIVEL_1')) {
+      return {
+        title: 'Nivel 1: Análisis por cantidad de cursos',
+        points: [
+          'Solo mira cuántos cursos quieres tomar en total',
+          'Ejemplo: Si quieres tomar 4 cursos, busca a todos los que tomaron 4 cursos, sin importar cuáles',
+          'Se usa si no hay suficientes datos en los otros niveles (requiere al menos 5 casos)'
+        ]
+      };
+    } else if (upperNivel.includes('NIVEL_2')) {
+      return {
+        title: 'Nivel 2: Análisis por áreas temáticas',
+        points: [
+          'Busca estudiantes que tomaron cursos de las mismas áreas temáticas',
+          'Ejemplo: Si quieres tomar 2 cursos de ingeniería y 1 de ciencias, busca a quienes tomaron esa proporción',
+          'Solo se usa si hay al menos 10 estudiantes similares'
+        ]
+      };
+    } else if (upperNivel.includes('NIVEL_3')) {
+      return {
+        title: 'Nivel 3: Análisis por cursos específicos',
+        points: [
+          'Busca estudiantes que tomaron exactamente los mismos cursos',
+          'Ejemplo: Si quieres tomar Cálculo I, Física I y Programación I, busca a quienes tomaron esos 3 cursos específicos',
+          'Solo se usa si hay al menos 20 estudiantes con esa combinación exacta'
+        ]
+      };
+    } else {
+      return {
+        title: 'No info',
+        points: ['No hay información disponible para este nivel.']
+      };
+    }
+  };
+
+  // Get razon explanation
+  const getRazonExplanation = (razon: string, nivel: string) => {
+    const upperRazon = razon.toUpperCase();
+    const upperNivel = nivel.toUpperCase();
+
+    if (upperRazon.includes('MAINSTREAM') && upperNivel.includes('NIVEL_3')) {
+      return {
+        title: 'NIVEL 3 - Estudiante MAINSTREAM (Confiable)',
+        points: [
+          'Hay muchos casos exactamente iguales al tuyo',
+          'La predicción es muy precisa',
+          'Ejemplo: "Encontramos 87 estudiantes que tomaron exactamente tus mismos cursos"'
+        ]
+      };
+    } else if (upperRazon.includes('MAINSTREAM') && upperNivel.includes('NIVEL_2')) {
+      return {
+        title: 'NIVEL 2 - Estudiante MAINSTREAM (Moderadamente confiable)',
+        points: [
+          'No hay suficientes casos exactos, pero sí casos parecidos',
+          'La predicción es buena pero menos precisa',
+          'Ejemplo: "Encontramos 45 estudiantes que tomaron cursos de las mismas categorías"'
+        ]
+      };
+    } else if ((upperRazon.includes('MAINSTREAM') || upperRazon.includes('OUTLIER')) && upperNivel.includes('NIVEL_1')) {
+      return {
+        title: 'NIVEL 1 - Estudiante MAINSTREAM o OUTLIER (Menos confiable)',
+        points: [
+          'Combinación poco común, solo sabemos cuántos cursos tomas',
+          'La predicción es general',
+          'Ejemplo: "Encontramos 120 estudiantes que tomaron 4 cursos como tú"'
+        ]
+      };
+    } else if (upperRazon.includes('OUTLIER')) {
+      return {
+        title: 'Estudiante OUTLIER (Advertencia)',
+        points: [
+          'Tu combinación es única o muy rara',
+          'No hay suficientes datos históricos',
+          'Usamos una probabilidad general (93.77% - el promedio de todos)'
+        ]
+      };
+    } else {
+      return {
+        title: 'No info',
+        points: ['No hay información específica disponible para esta razón.']
+      };
+    }
+  };
+
+  // Get confianza explanation
+  const getConfianzaExplanation = (confianza: string) => {
+    const upperConfianza = confianza.toUpperCase();
+
+    if (upperConfianza.includes('ALTA')) {
+      return {
+        title: 'ALTA - 50 o más estudiantes similares',
+        points: [
+          'Puedes confiar mucho en esta predicción',
+          'Hay muchos casos históricos iguales al tuyo'
+        ]
+      };
+    } else if (upperConfianza.includes('MEDIA')) {
+      return {
+        title: 'MEDIA - Entre 20 y 49 estudiantes similares',
+        points: [
+          'La predicción es razonable',
+          'Hay bastantes casos similares'
+        ]
+      };
+    } else if (upperConfianza.includes('BAJA')) {
+      return {
+        title: 'BAJA - Menos de 20 estudiantes similares',
+        points: [
+          'Toma esta predicción con cautela',
+          'Pocos casos históricos para comparar'
+        ]
+      };
+    } else {
+      return {
+        title: 'No info',
+        points: ['No hay información disponible para este nivel de confianza.']
+      };
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center mt-5">
@@ -96,11 +224,22 @@ export default function Results() {
     );
   }
 
+  const nivelInfo = result ? getNivelExplanation(result.nivel_usado) : null;
+  const razonInfo = result ? getRazonExplanation(result.razon, result.nivel_usado) : null;
+  const confianzaInfo = result ? getConfianzaExplanation(result.confianza) : null;
+
   return (
     <div className="mt-4">
-      <Button variant="outline-secondary" className="mb-4" onClick={() => router.push('/')}>
-        &larr; Volver a la búsqueda
-      </Button>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <Button variant="outline-secondary" onClick={() => router.push('/')}>
+          &larr; Volver a la búsqueda
+        </Button>x
+        
+        <div className="d-flex align-items-center gap-2 text-muted">
+          <BsLightbulb size={20} className="text-primary" />
+          <small className="fst-italic">De click en este ícono para más información de cada indicador</small>
+        </div>
+      </div>
 
       <h2 className="mb-4 text-center fw-bold">Resultados del análisis</h2>
 
@@ -122,7 +261,7 @@ export default function Results() {
                             />
                         </div>
                         <Card.Text className="mt-3 text-muted">
-                            Para el estudiante <strong>{requestData?.estudiante_id}</strong> inscribiendo {requestData?.cursos.length} cursos.
+                            Para el estudiante <strong>{requestData?.estudiante_id}</strong> inscribiendo {requestData?.cursos.length} cursos para un total de {requestData?.creditos} créditos.
                         </Card.Text>
                     </Card.Body>
                 </Card>
@@ -143,7 +282,16 @@ export default function Results() {
                                 <span className="fw-bold">{result.num_estudiantes_similares}</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
-                                Nivel de análisis
+                                <div className="d-flex align-items-center gap-2">
+                                    <span>Nivel de análisis</span>
+                                    <span 
+                                      className="text-primary d-inline-flex align-items-center" 
+                                      style={{ cursor: 'pointer' }}
+                                      onClick={() => setShowNivelModal(true)}
+                                    >
+                                      <BsLightbulb size={20} />
+                                    </span>
+                                </div>
                                 <span className="text-end text-muted">{result.nivel_usado}</span>
                             </li>
                         </ul>
@@ -156,15 +304,33 @@ export default function Results() {
                 <Card className="h-100 shadow-sm">
                     <Card.Header className="fw-bold bg-light">Análisis del modelo</Card.Header>
                     <Card.Body>
-                        <Card.Title>Razón del resultado</Card.Title>
+                        <div className="d-flex align-items-center gap-2 mb-2">
+                            <Card.Title className="mb-0">Razón del resultado</Card.Title>
+                            <span 
+                              className="text-primary d-inline-flex align-items-center" 
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => setShowRazonModal(true)}
+                            >
+                              <BsLightbulb size={20} />
+                            </span>
+                        </div>
                         <Card.Text>
                             {result.razon}
                         </Card.Text>
                         <hr />
                         <div className="d-flex justify-content-between align-items-center">
-                            <span>Confianza del modelo: (alto es 50 o más, medio entre 20 y 49, bajo menos de 20) </span>
                             <div className="d-flex align-items-center gap-2">
-                                <span>{result.confianza}</span>
+                                <span>Confianza del modelo:</span>
+                                <span 
+                                  className="text-primary d-inline-flex align-items-center" 
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={() => setShowConfianzaModal(true)}
+                                >
+                                  <BsLightbulb size={20} />
+                                </span>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="fw-bold">{result.confianza}</span>
                             </div>
                         </div>
                     </Card.Body>
@@ -172,6 +338,63 @@ export default function Results() {
             </Col>
         </Row>
       )}
+
+      {/* Modal for Nivel Information */}
+      <Modal show={showNivelModal} onHide={() => setShowNivelModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{nivelInfo?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul>
+            {nivelInfo?.points.map((point, index) => (
+              <li key={index} className="mb-2">{point}</li>
+            ))}
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowNivelModal(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal for Razon Information */}
+      <Modal show={showRazonModal} onHide={() => setShowRazonModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{razonInfo?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul>
+            {razonInfo?.points.map((point, index) => (
+              <li key={index} className="mb-2">{point}</li>
+            ))}
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRazonModal(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal for Confianza Information */}
+      <Modal show={showConfianzaModal} onHide={() => setShowConfianzaModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{confianzaInfo?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul>
+            {confianzaInfo?.points.map((point, index) => (
+              <li key={index} className="mb-2">{point}</li>
+            ))}
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfianzaModal(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
