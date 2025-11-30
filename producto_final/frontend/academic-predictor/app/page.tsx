@@ -15,7 +15,8 @@ export default function Home() {
   // Input States
   const [studentInput, setStudentInput] = useState('');
   const [courseInput, setCourseInput] = useState('');
-  const [maxCredits, setMaxCredits] = useState(20);
+  const [maxCreditsInput, setMaxCreditsInput] = useState('20');
+  const [maxCredits, setMaxCredits] = useState<number | null>(null);
 
   // Selection States
   const [confirmedStudent, setConfirmedStudent] = useState<string | null>(null);
@@ -56,28 +57,58 @@ export default function Home() {
     }
   };
 
-   const handleMaxCredits = async (e?: React.FormEvent) => {
+  // 2. Handle Max Credits
+  const handleMaxCredits = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setMsg(null);
     
-    if (!studentInput.trim()) return;
-
-    setLoadingStudent(true);
-    const { exists } = await validateId('student', studentInput.trim());
-    setLoadingStudent(false);
-
-    if (exists) {
-      setConfirmedStudent(studentInput.trim());
-      setStudentInput(''); // Clear input
-      setMsg({ type: 'success', text: 'Estudiante encontrado y seleccionado.' });
-    } else {
-      setMsg({ type: 'danger', text: `El estudiante ${studentInput} no existe en la base de datos.` });
+    const credits = parseInt(maxCreditsInput);
+    
+    if (isNaN(credits) || credits <= 0) {
+      setMsg({ type: 'danger', text: 'Por favor ingrese un número válido mayor a 0.' });
+      return;
     }
+    
+    if (credits > 30) {
+      setMsg({ type: 'danger', text: 'El máximo de créditos no puede ser mayor a 30.' });
+      return;
+    }
+
+    setMaxCredits(credits);
+    setMsg({ type: 'success', text: `Máximo de créditos configurado: ${credits}` });
   };
 
-  // 2. Handle Course Search
+  // 3. Handle Course Search
   const handleSearchCourse = async (e?: React.FormEvent) => {
-  
+    if (e) e.preventDefault();
+    setMsg(null);
+
+    const courseId = courseInput.trim();
+    if (!courseId) return;
+
+    // Pre-check: Duplicates
+    if (selectedCourses.some(c => c.code === courseId)) {
+      setMsg({ type: 'danger', text: 'Este curso ya está en la lista.' });
+      return;
+    }
+
+    setLoadingCourse(true);
+    const { exists, credits } = await validateId('course', courseId);
+    setLoadingCourse(false);
+
+    if (exists) {
+      const creditsLimit = maxCredits || 20; // Use 20 as fallback
+      // Check if adding this course would exceed max credits
+      if (totalCredits + credits > creditsLimit) {
+        setMsg({ type: 'danger', text: `No se puede agregar. Excedería el máximo de ${creditsLimit} créditos (actual: ${totalCredits}, nuevo: ${totalCredits + credits}).` });
+        return;
+      }
+
+      setSelectedCourses([...selectedCourses, { code: courseId, credits }]);
+      setCourseInput(''); // Clear input
+    } else {
+      setMsg({ type: 'danger', text: `El curso ${courseId} no existe.` });
+    }
   };
 
   // Remove course
@@ -97,6 +128,8 @@ export default function Home() {
     sessionStorage.setItem('predictionPayload', JSON.stringify(payload));
     router.push('/results');
   };
+
+  const creditsLimit = maxCredits || 20;
 
   return (
     <main className="container mt-5" style={{ maxWidth: '800px' }}>
@@ -149,62 +182,55 @@ export default function Home() {
           <hr />
           
           {/* --- SECTION 2: MAX CREDITS --- */}
-          <div className="mb-4">
+          <div className="mb-5">
             <Form.Label className="fw-bold">2. Indicar máximo de créditos</Form.Label>
-            <Form onSubmit={handleMaxCredits}>
-              <InputGroup className="mb-2">
-                <Form.Control
-                  placeholder="Ej: CRS_00017889"
-                  value={courseInput}
-                  onChange={(e) => setCourseInput(e.target.value)}
-                  disabled={loadingCourse || totalCredits >= 20}
-                />
-                <Button variant="secondary" type="submit" disabled={loadingCourse || totalCredits >= 20}>
-                   {loadingCourse ? <Spinner size="sm" animation="border" /> : 'Agregar'}
-                </Button>
-              </InputGroup>
-            </Form>
             
-            {/* List of added courses */}
-            <div className="mt-3 p-3 bg-light rounded min-vh-10" style={{ minHeight: '100px' }}>
-              {selectedCourses.length === 0 ? (
-                <span className="text-muted fst-italic small">No hay cursos agregados aún.</span>
-              ) : (
-                <div className="d-flex flex-wrap gap-2">
-                  {selectedCourses.map(course => (
-                    <Badge key={course.code} bg="success" className="p-2 d-flex align-items-center">
-                      <span>{course.code} ({course.credits} créditos)</span>
-                      <span 
-                        className="ms-2 text-danger fw-bold" 
-                        style={{cursor: 'pointer'}} 
-                        onClick={() => removeCourse(course.code)}
-                      >
-                        &times;
-                      </span>
-                    </Badge>
-                  ))}
+            {maxCredits === null ? (
+              <Form onSubmit={handleMaxCredits}>
+                <InputGroup>
+                  <Form.Control
+                    type="number"
+                    placeholder="Ej: 20"
+                    value={maxCreditsInput}
+                    onChange={(e) => setMaxCreditsInput(e.target.value)}
+                    min="1"
+                    max="30"
+                  />
+                  <Button variant="primary" type="submit">
+                    Confirmar
+                  </Button>
+                </InputGroup>
+                <Form.Text className="text-muted">Ingrese un número entre 1 y 30.</Form.Text>
+              </Form>
+            ) : (
+              <div className="d-flex align-items-center p-3 border rounded bg-light-info border-info">
+                <div className="flex-grow-1">
+                  <strong>Créditos máximos:</strong> <span className="fs-5 ms-2 badge bg-info">{maxCredits}</span>
                 </div>
-              )}
-              <div className="text-end mt-2">
-                <small className="text-muted">
-                  <strong>{totalCredits} / 20 créditos</strong> ({selectedCourses.length} cursos)
-                </small>
+                <Button variant="outline-danger" size="sm" onClick={() => {
+                  setMaxCredits(null);
+                  setSelectedCourses([]);
+                }}>
+                  Cambiar
+                </Button>
               </div>
-            </div>
+            )}
           </div>
+
+          <hr />
 
           {/* --- SECTION 3: COURSES --- */}
           <div className="mb-4">
-            <Form.Label className="fw-bold">2. Agregar cursos a inscribir</Form.Label>
+            <Form.Label className="fw-bold">3. Agregar cursos a inscribir</Form.Label>
             <Form onSubmit={handleSearchCourse}>
               <InputGroup className="mb-2">
                 <Form.Control
                   placeholder="Ej: CRS_00017889"
                   value={courseInput}
                   onChange={(e) => setCourseInput(e.target.value)}
-                  disabled={loadingCourse || totalCredits >= 20}
+                  disabled={loadingCourse || totalCredits >= creditsLimit}
                 />
-                <Button variant="secondary" type="submit" disabled={loadingCourse || totalCredits >= 20}>
+                <Button variant="secondary" type="submit" disabled={loadingCourse || totalCredits >= creditsLimit}>
                    {loadingCourse ? <Spinner size="sm" animation="border" /> : 'Agregar'}
                 </Button>
               </InputGroup>
@@ -232,7 +258,7 @@ export default function Home() {
               )}
               <div className="text-end mt-2">
                 <small className="text-muted">
-                  <strong>{totalCredits} / 20 créditos</strong> ({selectedCourses.length} cursos)
+                  <strong>{totalCredits} / {creditsLimit} créditos</strong> ({selectedCourses.length} cursos)
                 </small>
               </div>
             </div>
