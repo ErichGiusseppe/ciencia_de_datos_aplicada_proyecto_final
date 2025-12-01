@@ -140,7 +140,8 @@ La ejecucion de los notebooks tiene que ser en el siguiente orden:
 1. `LADA_sistema_recomendacion_multinivel_v3.ipynb`
 2.  `LADA_sistema_recomendacion_multinivel_v4.ipynb`
 
-EL notebook version 3, la version 4 contiene las metricas de los distintos algoritmos, la v3 contiene 
+El notebook versión 3 contiene las métricas de un modelo fuzzy, el cual carga más rápido que el resto. La versión 4 incluye las métricas de los distintos algoritmos.
+
 Cada notebook asume que los datos están en la carpeta `../data/` con formato `.parquet`.
 
 ## Dependencias Principales
