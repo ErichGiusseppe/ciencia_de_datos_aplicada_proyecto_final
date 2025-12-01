@@ -1,5 +1,5 @@
-# Proyecto Final - Ciencia de Datos Aplicada
-## Sistema de Predicción de Éxito Académico
+# Proyecto Final - Ciencia de datos aplicada
+## Sistema de predicción de éxito académico
 
 Este proyecto consta de dos componentes principales:
 - **Backend**: API REST desarrollada con FastAPI que ejecuta el modelo de predicción
@@ -7,7 +7,7 @@ Este proyecto consta de dos componentes principales:
 
 ---
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 - Python 3.8 o superior
 - Node.js 18 o superior
@@ -15,7 +15,7 @@ Este proyecto consta de dos componentes principales:
 
 ---
 
-## 🚀 Configuración e Instalación
+## Configuración e Instalación
 
 ### 1. Backend (FastAPI)
 
@@ -90,7 +90,7 @@ El frontend estará disponible en: `http://localhost:3000`
 
 ---
 
-## 🔧 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 producto_final/
@@ -126,7 +126,7 @@ producto_final/
 
 ---
 
-## 📡 Endpoints de la API
+## Endpoints de la API
 
 ### POST `/predecir`
 Realiza una predicción de éxito académico para un estudiante.
@@ -164,7 +164,7 @@ Realiza una predicción de éxito académico para un estudiante.
 
 ---
 
-## 🎯 Uso de la Aplicación
+## Uso de la Aplicación
 
 1. **Inicio**: En la página principal, ingresa el código de estudiante
 2. **Selección de cursos**: Busca y selecciona los cursos que deseas analizar
@@ -176,7 +176,7 @@ Realiza una predicción de éxito académico para un estudiante.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 ### Backend
 - **FastAPI**: Framework web moderno para APIs
@@ -193,7 +193,7 @@ Realiza una predicción de éxito académico para un estudiante.
 
 ---
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 ### Backend no inicia
 - Verifica que el ambiente virtual esté activado
@@ -218,7 +218,7 @@ npm install
 
 ---
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 - El backend debe estar corriendo antes de usar el frontend
 - Los datos de estudiantes y cursos están anonimizados
@@ -226,13 +226,3 @@ npm install
 - La confianza del modelo depende del número de estudiantes similares encontrados
 
 ---
-
-## 👥 Autores
-
-Proyecto desarrollado para el curso de Ciencia de Datos Aplicada
-
----
-
-## 📄 Licencia
-
-Este proyecto es parte de un trabajo académico.
