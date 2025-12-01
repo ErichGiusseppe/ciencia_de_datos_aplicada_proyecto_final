@@ -6,6 +6,7 @@ import pickle
 import sys
 sys.path.append('./models')
 from lada_funciones import predecir_estudiante_api
+from histogram_creation_polars import create_histogram
 
 app = FastAPI()
 
@@ -38,4 +39,11 @@ def predecir(request: PrediccionRequest):
         df_estudiantes,
         resultados_por_nivel
     )
+
+    info_from_cluster = resultado.get('info_from_cluster', []) #This should be a list of tuples. Each tuple contains (student_id, current_period)
+
+    # Create histogram based on info_from_cluster
+    histogram = create_histogram(info_from_cluster)
+
+
     return resultado
