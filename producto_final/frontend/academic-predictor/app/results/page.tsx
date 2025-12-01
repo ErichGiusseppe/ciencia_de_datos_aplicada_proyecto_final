@@ -18,6 +18,9 @@ interface PredictionResponse {
   histogram_gpa: number[];
   histogram_total_semesters: number[];
   histogram_percentage_credits: number[];
+  gpa_range: { min: number; max: number };
+  semesters_range: { min: number; max: number };
+  credits_range: { min: number; max: number };
 }
 
 export default function Results() {
@@ -77,15 +80,18 @@ export default function Results() {
   }, [router]);
 
   // Draw D3 charts when result is available
-  useEffect(() => {
+    useEffect(() => {
     if (result && result.histogram_gpa && result.histogram_total_semesters && result.histogram_percentage_credits) {
-      drawChart(gpaChartRef.current, result.histogram_gpa, 'GPA Distribution', 'blue', 'GPA Value');
-      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Total Semesters Distribution', 'green', 'Semesters');
-      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Credits Approved % Distribution', 'red', 'Percentage');
+      console.log(result.gpa_range);
+      console.log(result.semesters_range);
+      console.log(result.credits_range);
+      drawChart(gpaChartRef.current, result.histogram_gpa, 'GPA Distribution', 'blue', 'GPA Value', result.gpa_range);
+      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Total Semesters Distribution', 'green', 'Semesters', result.semesters_range);
+      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Credits Approved % Distribution', 'red', 'Percentage', result.credits_range);
     }
   }, [result]);
 
-  const drawChart = (container: HTMLDivElement | null, data: number[], title: string, color: string, xLabel: string) => {
+    const drawChart = (container: HTMLDivElement | null, data: number[], title: string, color: string, xLabel: string, valueRange: { min: number; max: number }) => {
     if (!container) return;
 
     // Clear previous chart
@@ -102,25 +108,28 @@ export default function Results() {
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Create scales
+    // Create scales - now with actual value range
     const xScale = d3.scaleLinear()
-      .domain([0, data.length - 1])
+      .domain([valueRange.min, valueRange.max])
       .range([0, width]);
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(data) || 1])
       .range([height, 0]);
 
-    // Create line generator
+    // Create line generator - map indices to actual values
     const line = d3.line<number>()
-      .x((d, i) => xScale(i))
+      .x((d, i) => {
+        const actualValue = valueRange.min + (i / (data.length - 1)) * (valueRange.max - valueRange.min);
+        return xScale(actualValue);
+      })
       .y(d => yScale(d))
       .curve(d3.curveMonotoneX);
 
-    // Add X axis
+    // Add X axis with actual values
     svg.append('g')
       .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(xScale).ticks(5))
+      .call(d3.axisBottom(xScale).ticks(8))
       .append('text')
       .attr('x', width / 2)
       .attr('y', 40)
@@ -408,24 +417,29 @@ export default function Results() {
             </Col>
 
             {/* Distribution Charts */}
-            <Col md={12} className="mb-4">
+             <Col md={12} className="mb-4">
                 <Card className="shadow-sm">
                     <Card.Header className="fw-bold bg-light">Distribuciones del Cluster</Card.Header>
                     <Card.Body>
                         <Row>
-                            <Col md={4} className="mb-3">
+                            <Col md={12} className="mb-4">
                                 <div ref={gpaChartRef} style={{ width: '100%' }}></div>
                             </Col>
-                            <Col md={4} className="mb-3">
+                        </Row>
+                        <Row>
+                            <Col md={12} className="mb-4">
                                 <div ref={semestersChartRef} style={{ width: '100%' }}></div>
                             </Col>
-                            <Col md={4} className="mb-3">
+                        </Row>
+                        <Row>
+                            <Col md={12} className="mb-3">
                                 <div ref={creditsChartRef} style={{ width: '100%' }}></div>
                             </Col>
                         </Row>
                     </Card.Body>
                 </Card>
             </Col>
+
 
         </Row>
       )}
