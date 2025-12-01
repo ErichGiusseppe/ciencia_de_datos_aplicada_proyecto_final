@@ -21,7 +21,8 @@ ciencia_de_datos_aplicada_proyecto_final/
 │   └── riesgos_historicos_estudiante_pregrado_anonymized.ipynb
 │
 ├── docs/               # Documentación, presentaciones y anexos del proyecto
-│   ├── Resumen_Ejecutivo_Entrega_1.pdf  ← **Documento oficial de entrega**
+│   ├── Resumen_Ejecutivo_Entrega_1.pdf
+│   ├── Resumen_Ejecutivo_Entrega_2.pdf  ← **Documento oficial de entrega**
 │   ├── Proyecto_CDA_Completo.pdf
 │   └── [Presentación y mockups]
 │
@@ -29,7 +30,7 @@ ciencia_de_datos_aplicada_proyecto_final/
 └── requirements.txt    # Dependencias del proyecto
 ```
 
-**Documento oficial de entrega 1:** [`docs/Resumen_Ejecutivo_Entrega_1.pdf`](docs/Resumen_Ejecutivo_Entrega_1.pdf)
+**Documento oficial de entrega 2:** [`docs/Resumen_Ejecutivo_Entrega_2.pdf`](docs/Resumen_Ejecutivo_Entrega_2.pdf)
 
 La carpeta **`notebooks/`** contiene todos los notebooks Jupyter utilizados para el análisis exploratorio de datos (EDA) de cada uno de los ocho datasets del proyecto. Cada notebook se enfoca en un dataset específico y sigue una estructura consistente de análisis.
 
@@ -103,11 +104,13 @@ Calidad general notablemente buena con menos del 1% de valores nulos en variable
 
 - **`notebooks/`**: Contiene todos los notebooks de análisis exploratorio de datos
 - **`docs/`**: Contiene la documentación del proyecto:
-  - `Punto 6 Completo.pdf`: Documento del punto 6 de CDA
-  - `Proyecto_CDA Completo.pdf`
-  - `Resumen_Ejecutivo_Entrega_1.pdf`: Resumen ejecutivo del proyecto
-  - `CDA_prototipo.pdf`: Prototipo de la solución
-  - `Proyecto CDA_presentacion.pdf`: Presentación del proyecto
+  - `Exploracion_Datos_Completo`: Documento donde se encuentra toda la exploración de los datos.
+  - `Proyecto_CDA_Completo.pdf`
+  - `Resumen_Ejecutivo_Entrega_1.pdf`: Resumen ejecutivo del proyecto de la entrega 1
+  - `Resumen_Ejecutivo_Entrega_2.pdf`: Resumen ejecutivo del proyecto de la entrega 2
+  - `CDA_prototipo_entrega_1.pdf`: Prototipo de la solución entrega 1
+  - `Proyecto CDA_presentacion_entrega_1.pdf`: Presentación del proyecto entrega 1
+  - `Proyecto CDA_presentacion_entrega_2.pdf`: Presentación del proyecto entrega 2
 
 ## Instrucciones de Ejecución
 
@@ -153,3 +156,5 @@ Cada notebook asume que los datos están en la carpeta `../data/` con formato `.
 - pyarrow: Lectura de archivos parquet
 
 Para más detalles sobre versiones específicas, consultar `requirements.txt`.
+
+Para más detalles de las dependencias para el producto de datos final véase el README ubicado en la carpeta producto_final donde se encuentra de manera detallada como correr la aplicación implementada
