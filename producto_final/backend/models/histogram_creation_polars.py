@@ -119,7 +119,6 @@ def create_histogram(info_from_cluster: list, student_id: str = None):
         student_data = df_historial.filter(
             pl.col('CODIGO_ESTUDIANTE') == student_id
         ).sort('PERIODO', descending=True).head(1)
-        print(student_data)
         if len(student_data) > 0:
             student_total_semesters = student_data['TOTAL_SEMESTRES_MATRICULADOS'][0]
             student_percentage_credits = student_data['PORCENTAJE_CREDITOS_APROBADOS'][0]

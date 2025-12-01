@@ -88,9 +88,9 @@ export default function Results() {
       console.log(result.student_gpa);
       console.log(result.student_percentage_credits);
       console.log(result.student_total_semesters);
-      drawChart(gpaChartRef.current, result.histogram_gpa, 'GPA Distribution', 'blue', 'GPA Value', result.gpa_range, result.student_gpa);
-      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Total Semesters Distribution', 'green', 'Semesters', result.semesters_range, result.student_total_semesters);
-      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Credits Approved % Distribution', 'red', 'Percentage', result.credits_range, result.student_percentage_credits);
+      drawChart(gpaChartRef.current, result.histogram_gpa, 'Distribución de GPA', 'blue', 'Valor de GPA ', result.gpa_range, result.student_gpa);
+      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Distribución de semestres totales', 'green', 'Semestres', result.semesters_range, result.student_total_semesters);
+      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Distribución de porcentaje de créditos aprobados', 'red', 'Porcentaje', result.credits_range, result.student_percentage_credits);
     }
   }, [result]);
 
