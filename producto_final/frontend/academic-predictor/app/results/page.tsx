@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, Button, Spinner, Alert, ProgressBar, Badge, Row, Col, Modal } from 'react-bootstrap';
 import { BsLightbulb } from 'react-icons/bs';
+import * as d3 from 'd3';
 
 // Interface matching your API response
 interface PredictionResponse {
@@ -14,6 +15,9 @@ interface PredictionResponse {
   num_estudiantes_similares: number;
   confianza: string;
   total_clusters: number;
+  histogram_gpa: number[];
+  histogram_total_semesters: number[];
+  histogram_percentage_credits: number[];
 }
 
 export default function Results() {
@@ -25,6 +29,11 @@ export default function Results() {
   const [showNivelModal, setShowNivelModal] = useState(false);
   const [showRazonModal, setShowRazonModal] = useState(false);
   const [showConfianzaModal, setShowConfianzaModal] = useState(false);
+
+  // Refs for D3 charts
+  const gpaChartRef = useRef<HTMLDivElement>(null);
+  const semestersChartRef = useRef<HTMLDivElement>(null);
+  const creditsChartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,6 +75,96 @@ export default function Results() {
 
     fetchData();
   }, [router]);
+
+  // Draw D3 charts when result is available
+  useEffect(() => {
+    if (result && result.histogram_gpa && result.histogram_total_semesters && result.histogram_percentage_credits) {
+      drawChart(gpaChartRef.current, result.histogram_gpa, 'GPA Distribution', 'blue', 'GPA Value');
+      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Total Semesters Distribution', 'green', 'Semesters');
+      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Credits Approved % Distribution', 'red', 'Percentage');
+    }
+  }, [result]);
+
+  const drawChart = (container: HTMLDivElement | null, data: number[], title: string, color: string, xLabel: string) => {
+    if (!container) return;
+
+    // Clear previous chart
+    d3.select(container).selectAll('*').remove();
+
+    const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+    const width = container.clientWidth - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
+
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Create scales
+    const xScale = d3.scaleLinear()
+      .domain([0, data.length - 1])
+      .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(data) || 1])
+      .range([height, 0]);
+
+    // Create line generator
+    const line = d3.line<number>()
+      .x((d, i) => xScale(i))
+      .y(d => yScale(d))
+      .curve(d3.curveMonotoneX);
+
+    // Add X axis
+    svg.append('g')
+      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisBottom(xScale).ticks(5))
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', 40)
+      .attr('fill', 'black')
+      .style('text-anchor', 'middle')
+      .text(xLabel);
+
+    // Add Y axis
+    svg.append('g')
+      .call(d3.axisLeft(yScale))
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -height / 2)
+      .attr('y', -45)
+      .attr('fill', 'black')
+      .style('text-anchor', 'middle')
+      .text('Density');
+
+    // Add grid lines
+    svg.append('g')
+      .attr('class', 'grid')
+      .attr('opacity', 0.1)
+      .call(d3.axisLeft(yScale)
+        .tickSize(-width)
+        .tickFormat(() => '')
+      );
+
+    // Add line path
+    svg.append('path')
+      .datum(data)
+      .attr('fill', 'none')
+      .attr('stroke', color)
+      .attr('stroke-width', 2)
+      .attr('d', line);
+
+    // Add title
+    svg.append('text')
+      .attr('x', width / 2)
+      .attr('y', -5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '14px')
+      .style('font-weight', 'bold')
+      .text(title);
+  };
 
   // Helper for probability color
   const getVariant = (prob: number) => {
@@ -268,7 +367,7 @@ export default function Results() {
             </Col>
 
             {/* Details Card */}
-            <Col md={6} className="mb-4">
+            <Col md={12} className="mb-4">
                 <Card className="h-100 shadow-sm">
                     <Card.Header className="fw-bold bg-light">Detalles del clustering</Card.Header>
                     <Card.Body>
@@ -290,32 +389,8 @@ export default function Results() {
                                 </div>
                                 <span className="text-end text-muted">{result.nivel_usado}</span>
                             </li>
-                        </ul>
-                    </Card.Body>
-                </Card>
-            </Col>
-
-             {/* Context Card */}
-             <Col md={6} className="mb-4">
-                <Card className="h-100 shadow-sm">
-                    <Card.Header className="fw-bold bg-light">Análisis del modelo</Card.Header>
-                    <Card.Body>
-                        <div className="d-flex align-items-center gap-2 mb-2">
-                            <Card.Title className="mb-0">Razón del resultado</Card.Title>
-                            <span 
-                              className="text-primary d-inline-flex align-items-center" 
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => setShowRazonModal(true)}
-                            >
-                              <BsLightbulb size={20} />
-                            </span>
-                        </div>
-                        <Card.Text>
-                            {result.razon}
-                        </Card.Text>
-                        <hr />
-                        <div className="d-flex justify-content-between align-items-center">
-                            <div className="d-flex align-items-center gap-2">
+                            <li className="list-group-item d-flex justify-content-between align-items-center">
+                              <div className="d-flex align-items-center gap-2">
                                 <span>Confianza del modelo:</span>
                                 <span 
                                   className="text-primary d-inline-flex align-items-center" 
@@ -324,14 +399,34 @@ export default function Results() {
                                 >
                                   <BsLightbulb size={20} />
                                 </span>
-                            </div>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="fw-bold">{result.confianza}</span>
-                            </div>
-                        </div>
+                              </div>
+                              <span className="fw-bold">{result.confianza}</span>
+                            </li>
+                        </ul>
                     </Card.Body>
                 </Card>
             </Col>
+
+            {/* Distribution Charts */}
+            <Col md={12} className="mb-4">
+                <Card className="shadow-sm">
+                    <Card.Header className="fw-bold bg-light">Distribuciones del Cluster</Card.Header>
+                    <Card.Body>
+                        <Row>
+                            <Col md={4} className="mb-3">
+                                <div ref={gpaChartRef} style={{ width: '100%' }}></div>
+                            </Col>
+                            <Col md={4} className="mb-3">
+                                <div ref={semestersChartRef} style={{ width: '100%' }}></div>
+                            </Col>
+                            <Col md={4} className="mb-3">
+                                <div ref={creditsChartRef} style={{ width: '100%' }}></div>
+                            </Col>
+                        </Row>
+                    </Card.Body>
+                </Card>
+            </Col>
+
         </Row>
       )}
 

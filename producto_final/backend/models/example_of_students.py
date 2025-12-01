@@ -2,6 +2,7 @@ import pandas as pd
 import random
 from histogram_creation_polars import create_histogram
 import matplotlib.pyplot as plt
+import os
 
 def get_random_students(n_samples=6000):
     """
@@ -10,7 +11,8 @@ def get_random_students(n_samples=6000):
     Returns:
         list: A list of tuples (CODIGO_ESTUDIANTE, PERIODO)
     """
-    parquet_file = 'historial_rendimiento_academico_estudiante_anonymized.parquet'
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parquet_file = os.path.join(current_dir, 'historial_rendimiento_academico_estudiante_anonymized.parquet')
     
     # Read the Parquet file
     df = pd.read_parquet(parquet_file)

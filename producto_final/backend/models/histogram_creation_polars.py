@@ -2,6 +2,7 @@ import polars as pl
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
+import os
 
 def create_histogram(info_from_cluster: list): 
     """
@@ -20,9 +21,9 @@ def create_histogram(info_from_cluster: list):
     Returns a dictionary with keys 'gpa_histogram', 'total_semesters_histogram', 'percentage_credits_histogram', each containing a list of 200 values representing the histogram data.
     """
 
-    parquet_file_historial = 'historial_rendimiento_academico_estudiante_anonymized.parquet'
-    parquet_file_informacion = 'informacion_actual_estudiante_anonymized.parquet'
-
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parquet_file_historial = os.path.join(current_dir, 'historial_rendimiento_academico_estudiante_anonymized.parquet')
+    parquet_file_informacion = os.path.join(current_dir, 'informacion_actual_estudiante_anonymized.parquet')
     # Read the Parquet files using Polars
     df_historial = pl.read_parquet(parquet_file_historial)
     df_actual = pl.read_parquet(parquet_file_informacion)
@@ -105,7 +106,7 @@ def create_histogram(info_from_cluster: list):
     semesters_distribution, sem_bin_centers, sem_hist = create_distribution(total_semestres_list)
     credits_distribution, cred_bin_centers, cred_hist = create_distribution(porcentaje_creditos_list)
 
-    # Create comparison visualizations
+    '''# Create comparison visualizations
     fig, axes = plt.subplots(3, 2, figsize=(15, 12))
     
     # GPA - Original vs Interpolated
@@ -162,7 +163,7 @@ def create_histogram(info_from_cluster: list):
     plt.savefig('original_vs_interpolated_comparison.png', dpi=300, bbox_inches='tight')
     plt.show()
     
-    print("\nComparison graph saved as 'original_vs_interpolated_comparison.png'")
+    print("\nComparison graph saved as 'original_vs_interpolated_comparison.png'")'''
 
     return {
         'gpa_histogram': gpa_distribution,
