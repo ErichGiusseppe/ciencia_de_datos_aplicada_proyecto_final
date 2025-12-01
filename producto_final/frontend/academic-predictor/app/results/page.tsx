@@ -21,6 +21,9 @@ interface PredictionResponse {
   gpa_range: { min: number; max: number };
   semesters_range: { min: number; max: number };
   credits_range: { min: number; max: number };
+  student_gpa: number | null;
+  student_total_semesters: number | null;
+  student_percentage_credits: number | null;
 }
 
 export default function Results() {
@@ -82,16 +85,24 @@ export default function Results() {
   // Draw D3 charts when result is available
     useEffect(() => {
     if (result && result.histogram_gpa && result.histogram_total_semesters && result.histogram_percentage_credits) {
-      console.log(result.gpa_range);
-      console.log(result.semesters_range);
-      console.log(result.credits_range);
-      drawChart(gpaChartRef.current, result.histogram_gpa, 'GPA Distribution', 'blue', 'GPA Value', result.gpa_range);
-      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Total Semesters Distribution', 'green', 'Semesters', result.semesters_range);
-      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Credits Approved % Distribution', 'red', 'Percentage', result.credits_range);
+      console.log(result.student_gpa);
+      console.log(result.student_percentage_credits);
+      console.log(result.student_total_semesters);
+      drawChart(gpaChartRef.current, result.histogram_gpa, 'GPA Distribution', 'blue', 'GPA Value', result.gpa_range, result.student_gpa);
+      drawChart(semestersChartRef.current, result.histogram_total_semesters, 'Total Semesters Distribution', 'green', 'Semesters', result.semesters_range, result.student_total_semesters);
+      drawChart(creditsChartRef.current, result.histogram_percentage_credits, 'Credits Approved % Distribution', 'red', 'Percentage', result.credits_range, result.student_percentage_credits);
     }
   }, [result]);
 
-    const drawChart = (container: HTMLDivElement | null, data: number[], title: string, color: string, xLabel: string, valueRange: { min: number; max: number }) => {
+  const drawChart = (
+    container: HTMLDivElement | null, 
+    data: number[], 
+    title: string, 
+    color: string, 
+    xLabel: string, 
+    valueRange: { min: number; max: number },
+    studentValue: number | null
+  ) => {
     if (!container) return;
 
     // Clear previous chart
@@ -164,6 +175,32 @@ export default function Results() {
       .attr('stroke', color)
       .attr('stroke-width', 2)
       .attr('d', line);
+
+    // Add vertical dotted line for student value if it exists
+    if (studentValue !== null && studentValue !== undefined) {
+      const xPosition = xScale(studentValue);
+      
+      // Add the dotted line
+      svg.append('line')
+        .attr('x1', xPosition)
+        .attr('x2', xPosition)
+        .attr('y1', 0)
+        .attr('y2', height)
+        .attr('stroke', 'black')
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '5,5')
+        .attr('opacity', 0.7);
+      
+      // Add label for the student value
+      svg.append('text')
+        .attr('x', xPosition)
+        .attr('y', -10)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .style('fill', 'black')
+        .text(`Tu valor: ${studentValue.toFixed(2)}`);
+    }
 
     // Add title
     svg.append('text')

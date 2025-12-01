@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import os
 
-def create_histogram(info_from_cluster: list): 
+def create_histogram(info_from_cluster: list, student_id: str = None): 
     """
     Given a list of tuples (student_id, current_period), create multiple histogram of current_period values.
 
@@ -19,6 +19,10 @@ def create_histogram(info_from_cluster: list):
     We will not actually return the histograms, but rather the data needed to plot them. That data must be 200 bins for each histogram using interpolation or extrapolation as needed.
     
     Returns a dictionary with keys 'gpa_histogram', 'total_semesters_histogram', 'percentage_credits_histogram', each containing a list of 200 values representing the histogram data.
+
+    NEW FEATURES ADDED:
+    Additionally, the function now returns the min and max values for each metric (GPA, Total Semesters, Percentage Credits) to help in setting appropriate axes limits when visualizing the histograms.
+    Finally, it returns the GPA, Total Semesters, and Percentage Credits for the particular student.
     """
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -106,6 +110,33 @@ def create_histogram(info_from_cluster: list):
     semesters_distribution, sem_bin_centers, sem_hist = create_distribution(total_semestres_list)
     credits_distribution, cred_bin_centers, cred_hist = create_distribution(porcentaje_creditos_list)
 
+    student_gpa = None
+    student_total_semesters = None
+    student_percentage_credits = None
+
+    if student_id:
+        # Get the most recent period for this student
+        student_data = df_historial.filter(
+            pl.col('CODIGO_ESTUDIANTE') == student_id
+        ).sort('PERIODO', descending=True).head(1)
+        print(student_data)
+        if len(student_data) > 0:
+            student_total_semesters = student_data['TOTAL_SEMESTRES_MATRICULADOS'][0]
+            student_percentage_credits = student_data['PORCENTAJE_CREDITOS_APROBADOS'][0]
+            student_pga = student_data['PGA'][0]
+            
+            # Check if PGA is valid
+            if student_pga is not None and student_pga > 0:
+                student_gpa = student_pga
+            else:
+                # Try to get from ICFES
+                student_icfes = df_actual.filter(
+                    pl.col('CODIGO_ESTUDIANTE') == student_id
+                ).sort('PERIODO', descending=True).head(1)
+                
+                if len(student_icfes) > 0 and student_icfes['PUNTAJE_ICFES'][0] is not None:
+                    student_gpa = (float(student_icfes['PUNTAJE_ICFES'][0]) / 500.0) * 5.0
+
     '''# Create comparison visualizations
     fig, axes = plt.subplots(3, 2, figsize=(15, 12))
     
@@ -171,5 +202,8 @@ def create_histogram(info_from_cluster: list):
         'percentage_credits_histogram': credits_distribution,
         'gpa_range': {'min': min(pga_list) if pga_list else 0, 'max': max(pga_list) if pga_list else 5},
         'semesters_range': {'min': min(total_semestres_list) if total_semestres_list else 0, 'max': max(total_semestres_list) if total_semestres_list else 20},
-        'credits_range': {'min': min(porcentaje_creditos_list) if porcentaje_creditos_list else 0, 'max': max(porcentaje_creditos_list) if porcentaje_creditos_list else 100}
+        'credits_range': {'min': min(porcentaje_creditos_list) if porcentaje_creditos_list else 0, 'max': max(porcentaje_creditos_list) if porcentaje_creditos_list else 100},
+        'student_gpa': student_gpa,
+        'student_total_semesters': student_total_semesters,
+        'student_percentage_credits': student_percentage_credits,
     }
