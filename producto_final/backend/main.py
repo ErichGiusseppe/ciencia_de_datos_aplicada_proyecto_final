@@ -45,12 +45,16 @@ def predecir(request: PrediccionRequest):
     random_studens = get_random_students(6000)
     info_from_cluster = random_studens
     # Create histogram based on info_from_cluster
-    histogram = create_histogram(info_from_cluster)
+    histogram = create_histogram(info_from_cluster, student_id=request.estudiante_id)
     resultado['histogram_gpa'] = histogram['gpa_histogram']
     resultado['histogram_total_semesters'] = histogram['total_semesters_histogram']
     resultado['histogram_percentage_credits'] = histogram['percentage_credits_histogram']
     resultado['gpa_range'] = histogram['gpa_range']
     resultado['semesters_range'] = histogram['semesters_range']
     resultado['credits_range'] = histogram['credits_range']
-
+    resultado['student_gpa'] = histogram['student_gpa']
+    resultado['student_total_semesters'] = histogram['student_total_semesters']
+    resultado['student_percentage_credits'] = histogram['student_percentage_credits']
+    
+    
     return resultado
