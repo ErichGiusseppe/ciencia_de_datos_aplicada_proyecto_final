@@ -122,6 +122,8 @@ pip install -r requirements.txt
 ```
 
 ### Ejecución de Notebooks
+
+Primera Entrega:
 Los notebooks se encuentran en la carpeta `notebooks/` y pueden ejecutarse en orden según el dataset a explorar:
 
 1. `historial_estados_academicos_estudiante_anonymized.ipynb`
@@ -132,6 +134,13 @@ Los notebooks se encuentran en la carpeta `notebooks/` y pueden ejecutarse en or
 6. `informacion_financiera_estudiante_anonymized.ipynb`
 7. `percentiles_academicos_estudiante_anonymized.ipynb`
 8. `riesgos_historicos_estudiante_pregrado_anonymized.ipynb`
+
+Segunda Entrega
+La ejecucion de los notebooks tiene que ser en el siguiente orden:
+1. `LADA_sistema_recomendacion_multinivel_v3.ipynb`
+2.  `LADA_sistema_recomendacion_multinivel_v4.ipynb`
+
+El notebook versión 3 contiene las métricas de un modelo fuzzy, el cual carga más rápido que el resto. La versión 4 incluye las métricas de los distintos algoritmos.
 
 Cada notebook asume que los datos están en la carpeta `../data/` con formato `.parquet`.
 
