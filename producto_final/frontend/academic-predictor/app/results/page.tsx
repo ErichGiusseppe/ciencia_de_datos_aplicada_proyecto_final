@@ -274,11 +274,7 @@ export default function Results() {
                     <Card.Body>
                         <ul className="list-group list-group-flush">
                             <li className="list-group-item d-flex justify-content-between align-items-center">
-                                Cluster asignado (id)
-                                <Badge bg="info" pill> {result.cluster_id}</Badge>
-                            </li>
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                                Estudiantes similares
+                                Estudiantes similares dentro del cluster
                                 <span className="fw-bold">{result.num_estudiantes_similares}</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
