@@ -6,3 +6,5 @@ ydata-profiling>=4.5.0
 pyarrow>=12.0.0
 jupyter>=1.0.0
 ipython>=8.12.0
+scikit-learn
+scikit-fuzzy
