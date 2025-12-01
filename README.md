@@ -157,4 +157,4 @@ Cada notebook asume que los datos están en la carpeta `../data/` con formato `.
 
 Para más detalles sobre versiones específicas, consultar `requirements.txt`.
 
-Para más detalles de las dependencias para el producto de datos final véase el README ubicado en la carpeta producto_final donde se encuentra de manera detallada como correr la aplicación implementada
+Para más detalles de las dependencias para el producto de datos final véase el README ubicado en la carpeta `producto_final` donde se encuentra de manera detallada como correr la aplicación implementada
