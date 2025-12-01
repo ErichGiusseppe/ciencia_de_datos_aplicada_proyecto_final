@@ -49,6 +49,8 @@ def predecir(request: PrediccionRequest):
     resultado['histogram_gpa'] = histogram['gpa_histogram']
     resultado['histogram_total_semesters'] = histogram['total_semesters_histogram']
     resultado['histogram_percentage_credits'] = histogram['percentage_credits_histogram']
-
+    resultado['gpa_range'] = histogram['gpa_range']
+    resultado['semesters_range'] = histogram['semesters_range']
+    resultado['credits_range'] = histogram['credits_range']
 
     return resultado

@@ -168,5 +168,8 @@ def create_histogram(info_from_cluster: list):
     return {
         'gpa_histogram': gpa_distribution,
         'total_semesters_histogram': semesters_distribution,
-        'percentage_credits_histogram': credits_distribution
+        'percentage_credits_histogram': credits_distribution,
+        'gpa_range': {'min': min(pga_list) if pga_list else 0, 'max': max(pga_list) if pga_list else 5},
+        'semesters_range': {'min': min(total_semestres_list) if total_semestres_list else 0, 'max': max(total_semestres_list) if total_semestres_list else 20},
+        'credits_range': {'min': min(porcentaje_creditos_list) if porcentaje_creditos_list else 0, 'max': max(porcentaje_creditos_list) if porcentaje_creditos_list else 100}
     }
