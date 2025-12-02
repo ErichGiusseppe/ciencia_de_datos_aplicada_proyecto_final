@@ -140,10 +140,9 @@ Los notebooks se encuentran en la carpeta `notebooks/` y pueden ejecutarse en or
 
 Segunda Entrega
 La ejecucion de los notebooks tiene que ser en el siguiente orden:
-1. `LADA_sistema_recomendacion_multinivel_v3.ipynb`
-2.  `LADA_sistema_recomendacion_multinivel_v4.ipynb`
+1. `LADA_sistema_recomendacion_multinivel_v4_new_progresive.ipynb` 
 
-El notebook versión 3 contiene las métricas de un modelo fuzzy, el cual carga más rápido que el resto. La versión 4 incluye las métricas de los distintos algoritmos.
+Para mas detalles consultar el readmy de notebooks.
 
 Cada notebook asume que los datos están en la carpeta `../data/` con formato `.parquet`.
 
