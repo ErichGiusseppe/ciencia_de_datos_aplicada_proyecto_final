@@ -14,7 +14,8 @@ interface PredictionResponse {
   cluster_id: number;
   num_estudiantes_similares: number;
   confianza: string;
-  total_clusters: number;
+  algoritmo: string;
+  estudiantes_similares: [string, number][];
   histogram_gpa: number[];
   histogram_total_semesters: number[];
   histogram_percentage_credits: number[];
@@ -438,8 +439,8 @@ export default function Results() {
                             <li className="list-group-item d-flex justify-content-between align-items-center">
                               <div className="d-flex align-items-center gap-2">
                                 <span>Confianza del modelo:</span>
-                                <span 
-                                  className="text-primary d-inline-flex align-items-center" 
+                                <span
+                                  className="text-primary d-inline-flex align-items-center"
                                   style={{ cursor: 'pointer' }}
                                   onClick={() => setShowConfianzaModal(true)}
                                 >
@@ -448,7 +449,49 @@ export default function Results() {
                               </div>
                               <span className="fw-bold">{result.confianza}</span>
                             </li>
+                            <li className="list-group-item d-flex justify-content-between align-items-center">
+                              <span>Algoritmo de clustering:</span>
+                              <Badge bg="info">{result.algoritmo.toUpperCase()}</Badge>
+                            </li>
                         </ul>
+                    </Card.Body>
+                </Card>
+            </Col>
+
+            <Col md={12} className="mb-4">
+                <Card className="shadow-sm">
+                    <Card.Header className="bg-light fw-bold">
+                        Estudiantes con Perfil Similar ({result.estudiantes_similares?.length || 0})
+                    </Card.Header>
+                    <Card.Body>
+                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                            <table className="table table-sm table-hover">
+                                <thead className="table-light">
+                                    <tr>
+                                        <th>Código Estudiante</th>
+                                        <th>Periodo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {result.estudiantes_similares?.slice(0, 50).map(([id, periodo], idx) => (
+                                        <tr key={idx}>
+                                            <td><code>{id}</code></td>
+                                            <td>{periodo}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {result.estudiantes_similares && result.estudiantes_similares.length > 50 && (
+                                <Alert variant="info" className="mt-2 mb-0">
+                                    Mostrando los primeros 50 de {result.estudiantes_similares.length} estudiantes similares
+                                </Alert>
+                            )}
+                            {(!result.estudiantes_similares || result.estudiantes_similares.length === 0) && (
+                                <Alert variant="warning" className="mb-0">
+                                    No hay estudiantes similares disponibles para este perfil
+                                </Alert>
+                            )}
+                        </div>
                     </Card.Body>
                 </Card>
             </Col>

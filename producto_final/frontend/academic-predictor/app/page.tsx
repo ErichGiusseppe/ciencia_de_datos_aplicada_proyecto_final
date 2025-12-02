@@ -17,6 +17,9 @@ export default function Home() {
   const [courseInput, setCourseInput] = useState('');
   const [maxCreditsInput, setMaxCreditsInput] = useState('20');
   const [maxCredits, setMaxCredits] = useState<number | null>(null);
+  const [pgaAnterior, setPgaAnterior] = useState('');
+  const [semestresAnteriores, setSemestresAnteriores] = useState('');
+  const [pctCreditosAnterior, setPctCreditosAnterior] = useState('');
 
   // Autocomplete States
   const [studentSuggestions, setStudentSuggestions] = useState<string[]>([]);
@@ -103,20 +106,40 @@ export default function Home() {
   // 1. Handle Student Search
   const handleSearchStudent = async (studentId?: string) => {
     setMsg(null);
-    
+
     const idToSearch = studentId || studentInput.trim();
     if (!idToSearch) return;
 
     setLoadingStudent(true);
     const { exists } = await validateId('student', idToSearch);
-    setLoadingStudent(false);
 
     if (exists) {
+      const res = await fetch(`http://localhost:8000/consultar_estudiante/${idToSearch}`);
+      const data = await res.json();
+
+      if (data.error) {
+        setLoadingStudent(false);
+        setMsg({ type: 'danger', text: `Estudiante no encontrado en base de datos: ${data.error}` });
+        return;
+      }
+
+      if (data.pga_anterior !== null) {
+        setPgaAnterior(data.pga_anterior.toString());
+      }
+      if (data.semestres_anteriores !== null) {
+        setSemestresAnteriores(data.semestres_anteriores.toString());
+      }
+      if (data.pct_creditos_anterior !== null) {
+        setPctCreditosAnterior(data.pct_creditos_anterior.toString());
+      }
+
       setConfirmedStudent(idToSearch);
-      setStudentInput(''); // Clear input
+      setStudentInput('');
       setShowStudentDropdown(false);
-      setMsg({ type: 'success', text: 'Estudiante encontrado y seleccionado.' });
+      setLoadingStudent(false);
+      setMsg({ type: 'success', text: `Estudiante encontrado. Datos cargados (${data.fuente_pga}).` });
     } else {
+      setLoadingStudent(false);
       setMsg({ type: 'danger', text: `El estudiante ${idToSearch} no existe en la base de datos.` });
     }
   };
@@ -192,11 +215,14 @@ export default function Home() {
   // Submit to next page
   const handleSubmit = () => {
     if (!confirmedStudent || selectedCourses.length === 0) return;
-    
+
     const payload = {
       estudiante_id: confirmedStudent,
       cursos: selectedCourses.map(c => c.code),
-      creditos: totalCredits || 20
+      creditos: totalCredits || 20,
+      pga_anterior: parseFloat(pgaAnterior),
+      semestres_anteriores: parseInt(semestresAnteriores),
+      pct_creditos_anterior: parseFloat(pctCreditosAnterior)
     };
 
     sessionStorage.setItem('predictionPayload', JSON.stringify(payload));
@@ -314,6 +340,50 @@ export default function Home() {
 
           <hr />
 
+          {/* --- SECTION 2.5: PGA ANTERIOR --- */}
+          <div className="mb-4">
+            <Form.Label className="fw-bold">2.5 PGA del periodo anterior</Form.Label>
+            <Form.Control
+              type="number"
+              step="0.1"
+              min="0"
+              max="5"
+              placeholder="Ej: 3.8"
+              value={pgaAnterior}
+              onChange={(e) => setPgaAnterior(e.target.value)}
+            />
+            <Form.Text className="text-muted">Valor entre 0 y 5</Form.Text>
+          </div>
+
+          {/* --- SECTION 2.6: SEMESTRES ANTERIORES --- */}
+          <div className="mb-4">
+            <Form.Label className="fw-bold">2.6 Semestres cursados previamente</Form.Label>
+            <Form.Control
+              type="number"
+              min="0"
+              placeholder="Ej: 3"
+              value={semestresAnteriores}
+              onChange={(e) => setSemestresAnteriores(e.target.value)}
+            />
+          </div>
+
+          {/* --- SECTION 2.7: % CRÉDITOS APROBADOS --- */}
+          <div className="mb-4">
+            <Form.Label className="fw-bold">2.7 % de créditos aprobados anteriormente</Form.Label>
+            <Form.Control
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              placeholder="Ej: 85.0"
+              value={pctCreditosAnterior}
+              onChange={(e) => setPctCreditosAnterior(e.target.value)}
+            />
+            <Form.Text className="text-muted">Porcentaje entre 0 y 100</Form.Text>
+          </div>
+
+          <hr />
+
           {/* --- SECTION 3: COURSES --- */}
           <div className="mb-4">
             <Form.Label className="fw-bold">3. Agregar cursos a inscribir</Form.Label>
@@ -384,11 +454,17 @@ export default function Home() {
       </Card>
 
       <div className="d-flex justify-content-end">
-        <Button 
-          variant="primary" 
-          size="lg" 
+        <Button
+          variant="primary"
+          size="lg"
           onClick={handleSubmit}
-          disabled={!confirmedStudent || selectedCourses.length === 0}
+          disabled={
+            !confirmedStudent ||
+            selectedCourses.length === 0 ||
+            !pgaAnterior ||
+            !semestresAnteriores ||
+            !pctCreditosAnterior
+          }
         >
           Analizar datos &rarr;
         </Button>

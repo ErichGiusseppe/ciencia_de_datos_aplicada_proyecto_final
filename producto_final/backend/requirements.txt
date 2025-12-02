@@ -1,5 +1,5 @@
-pandas 
-numpy 
+pandas
+numpy
 scikit-fuzzy
 scikit-learn
 matplotlib
@@ -7,3 +7,4 @@ seaborn
 fastapi
 uvicorn
 polars
+pyarrow

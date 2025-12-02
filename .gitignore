@@ -16,6 +16,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+!producto_final/frontend/academic-predictor/lib/
 parts/
 sdist/
 var/
